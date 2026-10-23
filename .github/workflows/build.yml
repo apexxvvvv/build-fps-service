@@ -26,11 +26,10 @@ jobs:
           mkdir -p ~/aosp && cd ~/aosp
           repo init -u https://android.googlesource.com/platform/manifest -b android-16.0.0_r1 --depth=1 --partial-clone --clone-filter=blob:limit=10M
           
-      - name: Sync needed projects
+      - name: Sync only service implementation
         run: |
           cd ~/aosp
           repo sync -j8 --current-branch --no-tags --no-clone-bundle \
-            hardware/interfaces/biometrics \
             frameworks/native/services/biometrics \
             system/libhidl \
             system/libhwbinder \
