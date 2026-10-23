@@ -1,1 +1,59 @@
+name: Build AIDL Fingerprint Service
 
+on:
+  workflow_dispatch:  # manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y repo git python3 openjdk-17-jdk wget unzip
+          
+      - name: Setup repo
+        run: |
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          export PATH=~/bin:$PATH
+          
+      - name: Init AOSP (shallow, minimal)
+        run: |
+          mkdir -p ~/aosp && cd ~/aosp
+          repo init -u https://android.googlesource.com/platform/manifest -b android-16.0.0_r1 --depth=1 --partial-clone --clone-filter=blob:limit=10M
+          
+      - name: Sync only needed projects
+        run: |
+          cd ~/aosp
+          repo sync -j8 --current-branch --no-tags --no-clone-bundle \
+            frameworks/native/services/biometrics \
+            hardware/interfaces/biometrics/fingerprint \
+            system/libhidl \
+            system/libhwbinder \
+            system/libvintf \
+            system/tools/aidl \
+            frameworks/native/libs/binder \
+            frameworks/native/libs/gui \
+            frameworks/native/libs/ui \
+            frameworks/native/opengl/libs/EGL \
+            frameworks/native/opengl/libs/GLES
+            
+      - name: Build fingerprint service
+        run: |
+          cd ~/aosp
+          source build/envsetup.sh
+          lunch aosp_arm64-userdebug
+          m android.hardware.biometrics.fingerprint-service -j$(nproc)
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fps-service-arm64
+          path: |
+            out/target/product/generic_arm64/vendor/bin/hw/android.hardware.biometrics.fingerprint-service
+            out/target/product/generic_arm64/vendor/bin/hw/android.hardware.biometrics.fingerprint-service-debug
+          retention-days: 7
