@@ -30,7 +30,7 @@ jobs:
         run: |
           cd ~/aosp
           repo sync -j8 --current-branch --no-tags --no-clone-bundle \
-            hardware/interfaces/biometrics/fingerprint \
+            hardware/interfaces/biometrics \
             frameworks/native/services/biometrics \
             system/libhidl \
             system/libhwbinder \
@@ -44,8 +44,7 @@ jobs:
             system/libbase \
             system/liblog \
             system/libutils \
-            frameworks/native/cmds/servicemanager \
-            frameworks/native/services/biometrics/fingerprint
+            frameworks/native/cmds/servicemanager
             
       - name: Build fingerprint service
         run: |
