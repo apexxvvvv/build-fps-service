@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 180
     
     steps:
       - name: Install dependencies
@@ -26,7 +26,7 @@ jobs:
           mkdir -p ~/aosp && cd ~/aosp
           repo init -u https://android.googlesource.com/platform/manifest -b android-16.0.0_r1 --depth=1 --partial-clone --clone-filter=blob:limit=10M
           
-      - name: Sync minimal core (broad)
+      - name: Sync everything needed (broad patterns)
         run: |
           cd ~/aosp
           repo sync -j8 --current-branch --no-tags --no-clone-bundle \
@@ -39,8 +39,11 @@ jobs:
             system/libbase \
             system/liblog \
             system/libutils \
+            system/libcutils \
             frameworks/native/cmds/servicemanager \
-            hardware/interfaces/biometrics
+            hardware/interfaces/biometrics \
+            hardware/interfaces \
+            system/core
             
       - name: Build fingerprint service
         run: |
